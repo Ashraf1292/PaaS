@@ -32,23 +32,14 @@ def validate_user(username, password):
     
     try:
         cursor = connection.cursor()
-        # Adjust column names based on your actual table structure
-        # Common variations: user_name/username, password/passwd/user_password
-        query = "SELECT * FROM users WHERE user_name = %s AND password = %s"
+        # Query your exact table and column names
+        query = "SELECT * FROM User_info WHERE user_name = %s AND password = %s"
         cursor.execute(query, (username, password))
         result = cursor.fetchone()
         return result is not None
     except Error as e:
         print(f"Error validating user: {e}")
-        # Try alternative column names if first query fails
-        try:
-            query = "SELECT * FROM users WHERE username = %s AND password = %s"
-            cursor.execute(query, (username, password))
-            result = cursor.fetchone()
-            return result is not None
-        except Error as e2:
-            print(f"Error with alternative query: {e2}")
-            return False
+        return False
     finally:
         if cursor:
             cursor.close()
@@ -149,8 +140,24 @@ def health_check():
     """Health check endpoint"""
     connection = get_db_connection()
     if connection:
-        connection.close()
-        return jsonify({'status': 'healthy', 'database': 'connected'})
+        try:
+            cursor = connection.cursor()
+            cursor.execute("SELECT COUNT(*) FROM User_info")
+            count = cursor.fetchone()[0]
+            cursor.close()
+            connection.close()
+            return jsonify({
+                'status': 'healthy', 
+                'database': 'connected',
+                'users_count': count
+            })
+        except Error as e:
+            connection.close()
+            return jsonify({
+                'status': 'unhealthy', 
+                'database': 'connected but query failed',
+                'error': str(e)
+            }), 500
     else:
         return jsonify({'status': 'unhealthy', 'database': 'disconnected'}), 500
 
