@@ -8,11 +8,12 @@ app = Flask(__name__)
 # Database configuration - Using environment variables for Render
 DB_CONFIG = {
     'host': os.environ.get('DB_HOST'),
-    'port': int(os.environ.get('DB_PORT', 3306)),
+    'port': int(os.environ.get('DB_PORT', 11794)),  # Updated to your port
     'database': os.environ.get('DB_NAME'),
     'user': os.environ.get('DB_USER'),
     'password': os.environ.get('DB_PASSWORD'),
-    'ssl_disabled': False
+    'ssl_disabled': False,
+    'autocommit': True
 }
 
 def get_db_connection():
@@ -28,15 +29,43 @@ def validate_user(username, password):
     """Validate user credentials against existing database"""
     connection = get_db_connection()
     if not connection:
+        print("No database connection available")
         return False
     
     try:
         cursor = connection.cursor()
+        
+        # First, let's see what's actually in the database
+        print(f"Attempting to validate user: '{username}' with password: '{password}'")
+        
+        # Debug: Check all users in the table
+        cursor.execute("SELECT user_name, password FROM User_info")
+        all_users = cursor.fetchall()
+        print(f"All users in database: {all_users}")
+        
         # Query your exact table and column names
-        query = "SELECT * FROM User_info WHERE user_name = %s AND password = %s"
+        query = "SELECT user_name, password FROM User_info WHERE user_name = %s AND password = %s"
         cursor.execute(query, (username, password))
         result = cursor.fetchone()
-        return result is not None
+        
+        print(f"Query result: {result}")
+        
+        if result:
+            print("User validation successful!")
+            return True
+        else:
+            # Try case-insensitive search
+            query_case = "SELECT user_name, password FROM User_info WHERE LOWER(user_name) = LOWER(%s) AND password = %s"
+            cursor.execute(query_case, (username, password))
+            result_case = cursor.fetchone()
+            
+            if result_case:
+                print("User validation successful (case-insensitive)!")
+                return True
+            else:
+                print("No matching user found")
+                return False
+                
     except Error as e:
         print(f"Error validating user: {e}")
         return False
@@ -135,8 +164,52 @@ def api_login():
     else:
         return jsonify({'success': False, 'message': 'Invalid credentials'}), 401
 
-@app.route('/health')
-def health_check():
+@app.route('/debug')
+def debug_info():
+    """Debug endpoint to check database connection and data"""
+    connection = get_db_connection()
+    if not connection:
+        return jsonify({'error': 'No database connection'}), 500
+    
+    try:
+        cursor = connection.cursor()
+        
+        # Check if table exists
+        cursor.execute("SHOW TABLES")
+        tables = cursor.fetchall()
+        
+        # Get table structure
+        cursor.execute("DESCRIBE User_info")
+        columns = cursor.fetchall()
+        
+        # Get sample data (first 3 rows, hiding passwords)
+        cursor.execute("SELECT user_name, 'HIDDEN' as password FROM User_info LIMIT 3")
+        sample_data = cursor.fetchall()
+        
+        # Count total users
+        cursor.execute("SELECT COUNT(*) FROM User_info")
+        user_count = cursor.fetchone()[0]
+        
+        cursor.close()
+        connection.close()
+        
+        return jsonify({
+            'database_connected': True,
+            'tables': [table[0] for table in tables],
+            'user_info_columns': [{'Field': col[0], 'Type': col[1]} for col in columns],
+            'sample_users': [{'user_name': row[0], 'password': row[1]} for row in sample_data],
+            'total_users': user_count,
+            'db_config': {
+                'host': os.environ.get('DB_HOST', 'Not set'),
+                'port': os.environ.get('DB_PORT', 'Not set'),
+                'database': os.environ.get('DB_NAME', 'Not set'),
+                'user': os.environ.get('DB_USER', 'Not set')
+            }
+        })
+        
+    except Error as e:
+        connection.close()
+        return jsonify({'error': str(e)}), 500
     """Health check endpoint"""
     connection = get_db_connection()
     if connection:
