@@ -8,12 +8,15 @@ app = Flask(__name__)
 # Database configuration - Using environment variables for Render
 DB_CONFIG = {
     'host': os.environ.get('DB_HOST'),
-    'port': int(os.environ.get('DB_PORT', 11794)),  # Updated to your port
+    'port': int(os.environ.get('DB_PORT', 11794)),
     'database': os.environ.get('DB_NAME'),
     'user': os.environ.get('DB_USER'),
     'password': os.environ.get('DB_PASSWORD'),
     'ssl_disabled': False,
-    'autocommit': True
+    'ssl_verify_cert': False,  # Aiven compatibility
+    'autocommit': True,
+    'use_unicode': True,
+    'charset': 'utf8mb4'
 }
 
 def get_db_connection():
@@ -140,13 +143,27 @@ def login():
                                     message="Please enter both username and password", 
                                     message_type="error")
     
-    if validate_user(username, password):
+    # First check if we can connect to database
+    connection = get_db_connection()
+    if not connection:
         return render_template_string(LOGIN_TEMPLATE, 
-                                    message=f"Login successful! Welcome, {username}!", 
-                                    message_type="success")
-    else:
+                                    message="Database connection failed. Check your environment variables.", 
+                                    message_type="error")
+    connection.close()
+    
+    # Try to validate user
+    try:
+        if validate_user(username, password):
+            return render_template_string(LOGIN_TEMPLATE, 
+                                        message=f"Login successful! Welcome, {username}!", 
+                                        message_type="success")
+        else:
+            return render_template_string(LOGIN_TEMPLATE, 
+                                        message="Invalid username or password. Visit /debug to see database contents.", 
+                                        message_type="error")
+    except Exception as e:
         return render_template_string(LOGIN_TEMPLATE, 
-                                    message="Invalid username or password", 
+                                    message=f"Login error: {str(e)}", 
                                     message_type="error")
 
 @app.route('/api/login', methods=['POST'])
