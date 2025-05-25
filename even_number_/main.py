@@ -1,3 +1,9 @@
+from flask import Flask, render_template_string
+
+app = Flask(__name__)
+
+# HTML template as a string
+HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -278,3 +284,15 @@
     </script>
 </body>
 </html>
+"""
+
+@app.route('/')
+def home():
+    return render_template_string(HTML_TEMPLATE)
+
+@app.route('/health')
+def health_check():
+    return {"status": "healthy"}, 200
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=8080, debug=True)
