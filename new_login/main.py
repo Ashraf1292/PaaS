@@ -28,12 +28,12 @@ def get_db_connection():
         print(f"Error connecting to MySQL: {e}")
         return None
 
-def validate_user(username, password, email=None, role=None):
-    """Validate user credentials against existing database including email and role"""
+def validate_user(username, password, email=None, phone=None):
+    """Validate user credentials against existing database with additional info"""
     connection = get_db_connection()
     if not connection:
         print("No database connection available")
-        return False, None
+        return False
     
     try:
         cursor = connection.cursor()
@@ -42,25 +42,30 @@ def validate_user(username, password, email=None, role=None):
         print(f"Attempting to validate user: '{username}' with password: '{password}'")
         if email:
             print(f"Email: '{email}'")
-        if role:
-            print(f"Role: '{role}'")
+        if phone:
+            print(f"Phone: '{phone}'")
         
         # Debug: Check all users in the table
-        cursor.execute("SELECT user_name, password, email, role FROM User_info")
+        cursor.execute("SELECT user_name, password, email, phone FROM User_info")
         all_users = cursor.fetchall()
         print(f"All users in database: {all_users}")
         
-        # Build query based on provided parameters
-        base_query = "SELECT user_name, password, email, role FROM User_info WHERE user_name = %s AND password = %s"
+        # Build dynamic query based on provided information
+        base_query = "SELECT user_name, password, email, phone FROM User_info WHERE user_name = %s AND password = %s"
         params = [username, password]
         
-        if email:
+        # Add email check if provided
+        if email and email.strip():
             base_query += " AND email = %s"
-            params.append(email)
+            params.append(email.strip())
         
-        if role:
-            base_query += " AND role = %s"
-            params.append(role)
+        # Add phone check if provided
+        if phone and phone.strip():
+            base_query += " AND phone = %s"
+            params.append(phone.strip())
+        
+        print(f"Executing query: {base_query}")
+        print(f"With parameters: {params}")
         
         cursor.execute(base_query, params)
         result = cursor.fetchone()
@@ -68,44 +73,34 @@ def validate_user(username, password, email=None, role=None):
         print(f"Query result: {result}")
         
         if result:
-            user_data = {
-                'username': result[0],
-                'email': result[2] if len(result) > 2 else None,
-                'role': result[3] if len(result) > 3 else None
-            }
             print("User validation successful!")
-            return True, user_data
+            return True
         else:
             # Try case-insensitive search for username and email
-            case_query = "SELECT user_name, password, email, role FROM User_info WHERE LOWER(user_name) = LOWER(%s) AND password = %s"
+            case_query = "SELECT user_name, password, email, phone FROM User_info WHERE LOWER(user_name) = LOWER(%s) AND password = %s"
             case_params = [username, password]
             
-            if email:
+            if email and email.strip():
                 case_query += " AND LOWER(email) = LOWER(%s)"
-                case_params.append(email)
+                case_params.append(email.strip())
             
-            if role:
-                case_query += " AND role = %s"
-                case_params.append(role)
+            if phone and phone.strip():
+                case_query += " AND phone = %s"
+                case_params.append(phone.strip())
             
             cursor.execute(case_query, case_params)
             result_case = cursor.fetchone()
             
             if result_case:
-                user_data = {
-                    'username': result_case[0],
-                    'email': result_case[2] if len(result_case) > 2 else None,
-                    'role': result_case[3] if len(result_case) > 3 else None
-                }
                 print("User validation successful (case-insensitive)!")
-                return True, user_data
+                return True
             else:
                 print("No matching user found")
-                return False, None
+                return False
                 
     except Error as e:
         print(f"Error validating user: {e}")
-        return False, None
+        return False
     finally:
         if cursor:
             cursor.close()
@@ -116,12 +111,12 @@ LOGIN_TEMPLATE = """
 <!DOCTYPE html>
 <html>
 <head>
-    <title>User Login Validation</title>
+    <title>Enhanced User Login Validation</title>
     <style>
         body { font-family: Arial, sans-serif; max-width: 500px; margin: 50px auto; padding: 20px; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input[type="text"], input[type="password"], input[type="email"], select { 
+        input[type="text"], input[type="password"], input[type="email"], input[type="tel"] { 
             width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; 
         }
         button { 
@@ -132,34 +127,31 @@ LOGIN_TEMPLATE = """
         .message { padding: 10px; margin: 10px 0; border-radius: 4px; }
         .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .user-info { background-color: #e7f3ff; padding: 15px; border-radius: 4px; margin-top: 10px; }
-        .optional { font-size: 0.9em; color: #666; }
+        .optional { color: #666; font-size: 0.9em; font-style: italic; }
+        .divider { margin: 20px 0; border-top: 1px solid #ddd; padding-top: 15px; }
+        .info-box { 
+            background-color: #e3f2fd; color: #1565c0; padding: 15px; 
+            border-radius: 4px; margin-bottom: 20px; border-left: 4px solid #2196f3; 
+        }
     </style>
 </head>
 <body>
-    <h2>User Login Validation</h2>
+    <h2>Enhanced User Login Validation</h2>
+    
+    <div class="info-box">
+        <strong>Multi-Factor Validation:</strong> Enter your username and password. 
+        Optionally provide email and/or phone number for additional security verification.
+    </div>
     
     {% if message %}
         <div class="message {{ message_type }}">{{ message }}</div>
     {% endif %}
     
-    {% if user_data %}
-        <div class="user-info">
-            <h3>Login Successful!</h3>
-            <p><strong>Username:</strong> {{ user_data.username }}</p>
-            {% if user_data.email %}
-                <p><strong>Email:</strong> {{ user_data.email }}</p>
-            {% endif %}
-            {% if user_data.role %}
-                <p><strong>Role:</strong> {{ user_data.role }}</p>
-            {% endif %}
-        </div>
-    {% endif %}
-    
     <form method="POST" action="/login">
         <div class="form-group">
             <label for="username">Username: <span style="color: red;">*</span></label>
-            <input type="text" id="username" name="username" required>
+            <input type="text" id="username" name="username" required 
+                   value="{{ request.form.username if request.form.username else '' }}">
         </div>
         
         <div class="form-group">
@@ -167,30 +159,30 @@ LOGIN_TEMPLATE = """
             <input type="password" id="password" name="password" required>
         </div>
         
-        <div class="form-group">
-            <label for="email">Email: <span class="optional">(optional)</span></label>
-            <input type="email" id="email" name="email" placeholder="Optional - for additional verification">
+        <div class="divider">
+            <strong>Additional Verification</strong> <span class="optional">(Optional - but increases security)</span>
         </div>
         
         <div class="form-group">
-            <label for="role">Role: <span class="optional">(optional)</span></label>
-            <select id="role" name="role">
-                <option value="">Select role (optional)</option>
-                <option value="admin">Admin</option>
-                <option value="user">User</option>
-                <option value="manager">Manager</option>
-                <option value="employee">Employee</option>
-                <option value="guest">Guest</option>
-            </select>
+            <label for="email">Email Address:</label>
+            <input type="email" id="email" name="email" placeholder="your.email@example.com"
+                   value="{{ request.form.email if request.form.email else '' }}">
+            <small class="optional">Leave blank if you don't want to verify email</small>
         </div>
         
-        <button type="submit">Login</button>
+        <div class="form-group">
+            <label for="phone">Phone Number:</label>
+            <input type="tel" id="phone" name="phone" placeholder="e.g., +1234567890"
+                   value="{{ request.form.phone if request.form.phone else '' }}">
+            <small class="optional">Leave blank if you don't want to verify phone</small>
+        </div>
+        
+        <button type="submit">Validate Login</button>
     </form>
     
     <hr>
-    <p><strong>Required fields:</strong> Username and Password</p>
-    <p><strong>Optional fields:</strong> Email and Role (for additional verification)</p>
-    <p><em>If you provide email or role, they must match your database record.</em></p>
+    <p><strong>Use your existing database credentials to test</strong></p>
+    <p><small>* Required fields | Additional fields are optional but provide extra security</small></p>
 </body>
 </html>
 """
@@ -205,53 +197,58 @@ def login():
     """Handle login form submission"""
     username = request.form.get('username')
     password = request.form.get('password')
-    email = request.form.get('email')  # Optional
-    role = request.form.get('role')    # Optional
-    
-    # Clean up empty strings
-    email = email.strip() if email else None
-    role = role.strip() if role else None
+    email = request.form.get('email')
+    phone = request.form.get('phone')
     
     if not username or not password:
         return render_template_string(LOGIN_TEMPLATE, 
                                     message="Please enter both username and password", 
-                                    message_type="error")
+                                    message_type="error",
+                                    request=request)
     
     # First check if we can connect to database
     connection = get_db_connection()
     if not connection:
         return render_template_string(LOGIN_TEMPLATE, 
                                     message="Database connection failed. Check your environment variables.", 
-                                    message_type="error")
+                                    message_type="error",
+                                    request=request)
     connection.close()
     
     # Try to validate user
     try:
-        is_valid, user_data = validate_user(username, password, email, role)
-        if is_valid:
-            return render_template_string(LOGIN_TEMPLATE, 
-                                        message=f"Login successful! Welcome, {username}!", 
-                                        message_type="success",
-                                        user_data=user_data)
-        else:
-            error_msg = "Invalid credentials."
-            if email and role:
-                error_msg += " Username, password, email, and role must all match."
-            elif email:
-                error_msg += " Username, password, and email must all match."
-            elif role:
-                error_msg += " Username, password, and role must all match."
-            else:
-                error_msg += " Username and password must match."
-            error_msg += " Visit /debug to see database contents."
+        if validate_user(username, password, email, phone):
+            verification_details = []
+            if email and email.strip():
+                verification_details.append(f"email ({email})")
+            if phone and phone.strip():
+                verification_details.append(f"phone ({phone})")
+            
+            success_message = f"Login successful! Welcome, {username}!"
+            if verification_details:
+                success_message += f" Additional verification passed for: {', '.join(verification_details)}"
             
             return render_template_string(LOGIN_TEMPLATE, 
-                                        message=error_msg, 
-                                        message_type="error")
+                                        message=success_message, 
+                                        message_type="success",
+                                        request=request)
+        else:
+            error_message = "Invalid credentials."
+            if email and email.strip():
+                error_message += " Email verification failed."
+            if phone and phone.strip():
+                error_message += " Phone verification failed."
+            error_message += " Visit /debug to see database contents."
+            
+            return render_template_string(LOGIN_TEMPLATE, 
+                                        message=error_message, 
+                                        message_type="error",
+                                        request=request)
     except Exception as e:
         return render_template_string(LOGIN_TEMPLATE, 
                                     message=f"Login error: {str(e)}", 
-                                    message_type="error")
+                                    message_type="error",
+                                    request=request)
 
 @app.route('/api/login', methods=['POST'])
 def api_login():
@@ -262,16 +259,21 @@ def api_login():
     
     username = data['username']
     password = data['password']
-    email = data.get('email')  # Optional
-    role = data.get('role')    # Optional
+    email = data.get('email')
+    phone = data.get('phone')
     
-    is_valid, user_data = validate_user(username, password, email, role)
-    if is_valid:
-        return jsonify({
-            'success': True, 
-            'message': f'Login successful for {username}',
-            'user_data': user_data
-        })
+    if validate_user(username, password, email, phone):
+        verification_info = []
+        if email:
+            verification_info.append('email')
+        if phone:
+            verification_info.append('phone')
+        
+        message = f'Login successful for {username}'
+        if verification_info:
+            message += f' with additional verification: {", ".join(verification_info)}'
+        
+        return jsonify({'success': True, 'message': message})
     else:
         return jsonify({'success': False, 'message': 'Invalid credentials'}), 401
 
@@ -294,7 +296,7 @@ def debug_info():
         columns = cursor.fetchall()
         
         # Get sample data (first 3 rows, hiding passwords)
-        cursor.execute("SELECT user_name, 'HIDDEN' as password, email, role FROM User_info LIMIT 3")
+        cursor.execute("SELECT user_name, 'HIDDEN' as password, email, phone FROM User_info LIMIT 3")
         sample_data = cursor.fetchall()
         
         # Count total users
@@ -308,7 +310,7 @@ def debug_info():
             'database_connected': True,
             'tables': [table[0] for table in tables],
             'user_info_columns': [{'Field': col[0], 'Type': col[1]} for col in columns],
-            'sample_users': [{'user_name': row[0], 'password': row[1], 'email': row[2], 'role': row[3]} for row in sample_data],
+            'sample_users': [{'user_name': row[0], 'password': row[1], 'email': row[2], 'phone': row[3]} for row in sample_data],
             'total_users': user_count,
             'db_config': {
                 'host': os.environ.get('DB_HOST', 'Not set'),
