@@ -401,6 +401,18 @@ def api_login():
         logger.error(f"API login error: {e}")
         return jsonify({'success': False, 'message': 'Internal server error'}), 500
 
+def safe_convert_to_json(value):
+    """Safely convert database values to JSON-serializable format"""
+    if isinstance(value, bytes):
+        try:
+            return value.decode('utf-8')
+        except UnicodeDecodeError:
+            return f"<binary data: {len(value)} bytes>"
+    elif isinstance(value, (int, float, str, bool)) or value is None:
+        return value
+    else:
+        return str(value)
+
 @app.route('/debug')
 def debug_info():
     """Debug endpoint to check database connection and data"""
@@ -433,12 +445,24 @@ def debug_info():
         cursor.execute("SELECT COUNT(*) FROM User_info")
         user_count = cursor.fetchone()[0]
         
+        # Safely convert all data to JSON-serializable format
+        safe_tables = [safe_convert_to_json(table[0]) for table in tables]
+        safe_columns = [{'Field': safe_convert_to_json(col[0]), 
+                        'Type': safe_convert_to_json(col[1]), 
+                        'Null': safe_convert_to_json(col[2]), 
+                        'Key': safe_convert_to_json(col[3])} for col in columns]
+        safe_users = [{'user_id': safe_convert_to_json(row[0]), 
+                      'user_name': safe_convert_to_json(row[1]), 
+                      'password': safe_convert_to_json(row[2]), 
+                      'email': safe_convert_to_json(row[3]), 
+                      'phone': safe_convert_to_json(row[4])} for row in sample_data]
+        
         return jsonify({
             'database_connected': True,
-            'tables': [table[0] for table in tables],
-            'user_info_columns': [{'Field': col[0], 'Type': col[1], 'Null': col[2], 'Key': col[3]} for col in columns],
-            'sample_users': [{'user_id': row[0], 'user_name': row[1], 'password': row[2], 'email': row[3], 'phone': row[4]} for row in sample_data],
-            'total_users': user_count,
+            'tables': safe_tables,
+            'user_info_columns': safe_columns,
+            'sample_users': safe_users,
+            'total_users': safe_convert_to_json(user_count),
             'db_config': {
                 'host': os.environ.get('DB_HOST', 'Not set'),
                 'port': os.environ.get('DB_PORT', 'Not set'),
@@ -473,8 +497,8 @@ def health_check():
             return jsonify({
                 'status': 'healthy', 
                 'database': 'connected',
-                'users_count': count,
-                'timestamp': request.environ.get('REQUEST_TIME', 'unknown')
+                'users_count': safe_convert_to_json(count),
+                'timestamp': safe_convert_to_json(request.environ.get('REQUEST_TIME', 'unknown'))
             })
         except Error as e:
             logger.error(f"Health check database error: {e}")
