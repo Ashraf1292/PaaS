@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: nth-largest-app
+    env: python
+    buildCommand: ""
+    startCommand: gunicorn main:app
