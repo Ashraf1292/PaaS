@@ -46,102 +46,97 @@ def get_db_connection():
         logger.error(f"Unexpected error during database connection: {e}")
         return None
 
-def validate_user(username, password, email=None, phone=None):
-    """Validate user credentials against existing database with additional info"""
+def add_user(username, password, email=None, phone=None):
+    """Add a new user to the database with provided information"""
     connection = get_db_connection()
     if not connection:
         logger.error("No database connection available")
-        return False
+        return False, "Database connection failed"
     
     cursor = None
     try:
         cursor = connection.cursor(buffered=True)
         
-        logger.info(f"Attempting to validate user: '{username}'")
+        # Log addition attempt (without password for security)
+        logger.info(f"Attempting to add user: '{username}'")
         if email:
             logger.info(f"Email provided: '{email}'")
         if phone:
             logger.info(f"Phone provided: '{phone}'")
         
-        try:
-            cursor.execute("DESCRIBE User_info")
-            columns = cursor.fetchall()
-            logger.info(f"Table structure: {columns}")
-        except Error as e:
-            logger.error(f"Error checking table structure: {e}")
+        # Check if username already exists
+        cursor.execute("SELECT user_id FROM User_info WHERE user_name = %s", (username,))
+        if cursor.fetchone():
+            logger.warning(f"Username '{username}' already exists")
+            return False, "Username already exists"
         
-        base_query = "SELECT user_id, user_name, password, email, phone FROM User_info WHERE user_name = %s AND password = %s"
-        params = [username, password]
+        # Check if email exists (if provided)
+        if email and email.strip():
+            cursor.execute("SELECT user_id FROM User_info WHERE email = %s", (email.strip(),))
+            if cursor.fetchone():
+                logger.warning(f"Email '{email}' already exists")
+                return False, "Email already exists"
+        
+        # Check if phone exists (if provided)
+        if phone and phone.strip():
+            cursor.execute("SELECT user_id FROM User_info WHERE phone = %s", (phone.strip(),))
+            if cursor.fetchone():
+                logger.warning(f"Phone '{phone}' already exists")
+                return False, "Phone number already exists"
+        
+        # Build insert query
+        base_query = "INSERT INTO User_info (user_name, password"
+        values = [username, password]
+        placeholders = ["%s", "%s"]
         
         if email and email.strip():
-            base_query += " AND email = %s"
-            params.append(email.strip())
+            base_query += ", email"
+            values.append(email.strip())
+            placeholders.append("%s")
         
         if phone and phone.strip():
-            base_query += " AND phone = %s"
-            params.append(phone.strip())
+            base_query += ", phone"
+            values.append(phone.strip())
+            placeholders.append("%s")
         
-        logger.info(f"Executing query with {len(params)} parameters")
+        base_query += ") VALUES (" + ", ".join(placeholders) + ")"
         
-        cursor.execute(base_query, params)
-        result = cursor.fetchone()
+        logger.info(f"Executing insert query with {len(values)} parameters")
+        cursor.execute(base_query, values)
         
-        if result:
-            logger.info("User validation successful!")
-            return True
-        else:
-            logger.info("Trying case-insensitive search")
-            case_query = "SELECT user_id, user_name, password, email, phone FROM User_info WHERE LOWER(user_name) = LOWER(%s) AND password = %s"
-            case_params = [username, password]
-            
-            if email and email.strip():
-                case_query += " AND LOWER(email) = LOWER(%s)"
-                case_params.append(email.strip())
-            
-            if phone and phone.strip():
-                case_query += " AND phone = %s"
-                case_params.append(phone.strip())
-            
-            cursor.execute(case_query, case_params)
-            result_case = cursor.fetchone()
-            
-            if result_case:
-                logger.info("User validation successful (case-insensitive)!")
-                return True
-            else:
-                logger.info("No matching user found")
-                return False
+        logger.info(f"User '{username}' added successfully")
+        return True, "User added successfully"
                 
     except Error as e:
-        logger.error(f"Database error validating user: {e}")
-        return False
+        logger.error(f"Database error adding user: {e}")
+        return False, f"Database error: {str(e)}"
     except Exception as e:
-        logger.error(f"Unexpected error validating user: {e}")
-        return False
+        logger.error(f"Unexpected error adding user: {e}")
+        return False, f"Unexpected error: {str(e)}"
     finally:
         if cursor:
             cursor.close()
         if connection and connection.is_connected():
             connection.close()
 
-# HTML template for login form with updated interface
+# HTML template for user registration form
 LOGIN_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced User Login Validation</title>
+    <title>User Registration</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="min-h-screen bg-gray-100 flex items-center justify-center p-4">
     <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
-        <h2 class="text-2xl font-bold text-center text-gray-800 mb-8">Secure Login</h2>
+        <h2 class="text-2xl font-bold text-center text-gray-800 mb-8">Create Your Account</h2>
         
         <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-8 rounded-r-lg">
             <p class="text-sm text-blue-800">
-                <span class="font-semibold">Multi-Factor Validation:</span> Enter your username and password. 
-                Optionally provide email and/or phone number for enhanced security.
+                <span class="font-semibold">Secure Registration:</span> Enter your username and password. 
+                Optionally provide email and/or phone number for account recovery.
             </p>
         </div>
         
@@ -158,7 +153,7 @@ LOGIN_TEMPLATE = """
                 </label>
                 <input type="text" id="username" name="username" required
                        value="{{ request.form.username if request.form.username else '' }}"
-                       placeholder="Enter your username"
+                       placeholder="Choose a username"
                        class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
             </div>
             
@@ -167,13 +162,13 @@ LOGIN_TEMPLATE = """
                     Password <span class="text-red-500">*</span>
                 </label>
                 <input type="password" id="password" name="password" required
-                       placeholder="Enter your password"
+                       placeholder="Create a password"
                        class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
             </div>
             
             <div class="pt-4 border-t border-gray-200">
-                <p class="text-sm font-semibold text-gray-700 mb-2">Additional Verification</p>
-                <p class="text-xs text-gray-500 italic mb-4">Optional - enhances security</p>
+                <p class="text-sm font-semibold text-gray-700 mb-2">Additional Information</p>
+                <p class="text-xs text-gray-500 italic mb-4">Optional - helps with account recovery</p>
             </div>
             
             <div>
@@ -182,7 +177,7 @@ LOGIN_TEMPLATE = """
                        placeholder="your.email@example.com"
                        value="{{ request.form.email if request.form.email else '' }}"
                        class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
-                <p class="text-xs text-gray-500 mt-1 italic">Leave blank if not verifying email</p>
+                <p class="text-xs text-gray-500 mt-1 italic">Leave blank if not providing email</p>
             </div>
             
             <div>
@@ -191,17 +186,17 @@ LOGIN_TEMPLATE = """
                        placeholder="e.g., +1234567890"
                        value="{{ request.form.phone if request.form.phone else '' }}"
                        class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
-                <p class="text-xs text-gray-500 mt-1 italic">Leave blank if not verifying phone</p>
+                <p class="text-xs text-gray-500 mt-1 italic">Leave blank if not providing phone</p>
             </div>
             
             <button type="submit"
                     class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200">
-                Validate Login
+                Register Account
             </button>
         </form>
         
         <div class="mt-8 pt-6 border-t border-gray-200 text-center text-sm text-gray-600">
-            <p class="font-medium">Test with your existing database credentials</p>
+            <p class="font-medium">Create a new account with your details</p>
             <p class="mt-2"><span class="text-red-500">*</span> Required fields | Additional fields are optional</p>
             <p class="mt-2">Visit <a href="/debug" class="text-blue-600 hover:underline">/debug</a> for database details</p>
         </div>
@@ -212,64 +207,52 @@ LOGIN_TEMPLATE = """
 
 @app.route('/')
 def index():
-    """Display login form"""
+    """Display registration form"""
     return render_template_string(LOGIN_TEMPLATE)
 
 @app.route('/login', methods=['POST'])
 def login():
-    """Handle login form submission with improved error handling"""
+    """Handle registration form submission with improved error handling"""
     try:
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '').strip()
         email = request.form.get('email', '').strip()
         phone = request.form.get('phone', '').strip()
         
+        # Validate required fields
         if not username or not password:
             return render_template_string(LOGIN_TEMPLATE, 
-                                        message="Please enter both username and password", 
+                                        message="Please provide both username and password", 
                                         message_type="error",
                                         request=request)
         
+        # Check database connection first
         connection = get_db_connection()
         if not connection:
-            logger.error("Database connection failed during login attempt")
+            logger.error("Database connection failed during registration attempt")
             return render_template_string(LOGIN_TEMPLATE, 
                                         message="Database connection failed. Please check your environment variables and try again.", 
                                         message_type="error",
                                         request=request)
         connection.close()
         
-        if validate_user(username, password, email, phone):
-            verification_details = []
-            if email:
-                verification_details.append(f"email ({email})")
-            if phone:
-                verification_details.append(f"phone ({phone})")
-            
-            success_message = f"Login successful! Welcome, {username}!"
-            if verification_details:
-                success_message += f" Additional verification passed for: {', '.join(verification_details)}"
-            
-            logger.info(f"Successful login for user: {username}")
+        # Attempt to add user
+        success, message = add_user(username, password, email, phone)
+        if success:
+            logger.info(f"Successful registration for user: {username}")
             return render_template_string(LOGIN_TEMPLATE, 
-                                        message=success_message, 
+                                        message=f"Registration successful! Welcome, {username}!", 
                                         message_type="success",
                                         request=request)
         else:
-            error_message = "Invalid credentials. Please check your username and password."
-            if email:
-                error_message += " Email verification also failed."
-            if phone:
-                error_message += " Phone verification also failed."
-            
-            logger.warning(f"Failed login attempt for user: {username}")
+            logger.warning(f"Failed registration attempt for user: {username} - {message}")
             return render_template_string(LOGIN_TEMPLATE, 
-                                        message=error_message, 
+                                        message=message, 
                                         message_type="error",
                                         request=request)
             
     except Exception as e:
-        logger.error(f"Unexpected error during login: {e}")
+        logger.error(f"Unexpected error during registration: {e}")
         return render_template_string(LOGIN_TEMPLATE, 
                                     message=f"An unexpected error occurred. Please try again.", 
                                     message_type="error",
@@ -277,7 +260,7 @@ def login():
 
 @app.route('/api/login', methods=['POST'])
 def api_login():
-    """API endpoint for login validation with improved error handling"""
+    """API endpoint for user registration with improved error handling"""
     try:
         data = request.get_json()
         if not data:
@@ -294,25 +277,16 @@ def api_login():
         if not username or not password:
             return jsonify({'success': False, 'message': 'Username and password cannot be empty'}), 400
         
-        if validate_user(username, password, email, phone):
-            verification_info = []
-            if email:
-                verification_info.append('email')
-            if phone:
-                verification_info.append('phone')
-            
-            message = f'Login successful for {username}'
-            if verification_info:
-                message += f' with additional verification: {", ".join(verification_info)}'
-            
-            logger.info(f"API login successful for user: {username}")
-            return jsonify({'success': True, 'message': message})
+        success, message = add_user(username, password, email, phone)
+        if success:
+            logger.info(f"API registration successful for user: {username}")
+            return jsonify({'success': True, 'message': f'Registration successful for {username}'})
         else:
-            logger.warning(f"API login failed for user: {username}")
-            return jsonify({'success': False, 'message': 'Invalid credentials'}), 401
+            logger.warning(f"API registration failed for user: {username} - {message}")
+            return jsonify({'success': False, 'message': message}), 400
             
     except Exception as e:
-        logger.error(f"API login error: {e}")
+        logger.error(f"API registration error: {e}")
         return jsonify({'success': False, 'message': 'Internal server error'}), 500
 
 def safe_convert_to_json(value):
