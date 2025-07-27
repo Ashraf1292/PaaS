@@ -7,6 +7,7 @@ HTML_TEMPLATE = '''
 <html>
 <head>
     <title>Matrix Multiplication</title>
+    <style>
     body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     padding: 50px;
@@ -302,6 +303,7 @@ label {
         font-size: 1em;
     }
 }</head>
+</style>
 <body>
     <h2>2x2 Matrix Multiplication</h2>
     <form method="post">
