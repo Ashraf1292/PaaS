@@ -302,8 +302,9 @@ label {
         margin: 4px;
         font-size: 1em;
     }
+   </style> 
 }</head>
-</style>
+
 <body>
     <h2>2x2 Matrix Multiplication</h2>
     <form method="post">
