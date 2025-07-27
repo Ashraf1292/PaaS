@@ -12,179 +12,283 @@ HTML_TEMPLATE = """
     <title>Even Numbers Generator</title>
     <style>
         * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #4c6ef5 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+    overflow-x: hidden;
+}
 
-        .container {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            max-width: 600px;
-            width: 100%;
-            text-align: center;
-        }
+body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 40% 80%, rgba(255, 255, 255, 0.06) 0%, transparent 50%);
+    pointer-events: none;
+}
 
-        h1 {
-            color: #333;
-            margin-bottom: 30px;
-            font-size: 2.5em;
-            font-weight: 300;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+.container {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 50px;
+    border-radius: 30px;
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    max-width: 650px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+    transform: translateY(0);
+    transition: all 0.3s ease;
+}
 
-        .input-group {
-            margin-bottom: 30px;
-        }
+.container:hover {
+    transform: translateY(-5px);
+    box-shadow: 
+        0 35px 70px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
 
-        label {
-            display: block;
-            margin-bottom: 10px;
-            color: #555;
-            font-size: 1.1em;
-            font-weight: 500;
-        }
+h1 {
+    color: #fff;
+    margin-bottom: 40px;
+    font-size: 3em;
+    font-weight: 700;
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+    letter-spacing: -1px;
+    position: relative;
+}
 
-        input[type="number"] {
-            width: 200px;
-            padding: 15px;
-            font-size: 1.2em;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            text-align: center;
-            transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.8);
-        }
+h1::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(90deg, #4c6ef5, #7c3aed);
+    border-radius: 2px;
+}
 
-        input[type="number"]:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 15px rgba(102, 126, 234, 0.3);
-            transform: translateY(-2px);
-        }
+.input-group {
+    margin-bottom: 40px;
+}
 
-        .btn {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            font-size: 1.1em;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin: 10px;
-            min-width: 120px;
-            font-weight: 500;
-        }
+label {
+    display: block;
+    margin-bottom: 15px;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.2em;
+    font-weight: 600;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
 
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
-        }
+input[type="number"] {
+    width: 220px;
+    padding: 18px 24px;
+    font-size: 1.3em;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 15px;
+    text-align: center;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    color: #fff;
+    font-weight: 500;
+}
 
-        .btn:active {
-            transform: translateY(-1px);
-        }
+input[type="number"]::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
 
-        .result {
-            margin-top: 30px;
-            padding: 20px;
-            background: rgba(102, 126, 234, 0.1);
-            border-radius: 15px;
-            border-left: 5px solid #667eea;
-            display: none;
-        }
+input[type="number"]:focus {
+    outline: none;
+    border-color: #4c6ef5;
+    background: rgba(255, 255, 255, 0.25);
+    box-shadow: 
+        0 0 25px rgba(76, 110, 245, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px) scale(1.02);
+}
 
-        .result.show {
-            display: block;
-            animation: fadeInUp 0.5s ease;
-        }
+.btn {
+    background: linear-gradient(135deg, #4c6ef5 0%, #7c3aed 100%);
+    color: white;
+    border: none;
+    padding: 18px 36px;
+    font-size: 1.1em;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    margin: 12px 8px;
+    min-width: 140px;
+    font-weight: 600;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(76, 110, 245, 0.3);
+}
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
 
-        .result h3 {
-            color: #333;
-            margin-bottom: 15px;
-            font-size: 1.3em;
-        }
+.btn:hover::before {
+    left: 100%;
+}
 
-        .numbers-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
-            gap: 10px;
-            margin-top: 15px;
-        }
+.btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 15px 35px rgba(76, 110, 245, 0.4);
+    background: linear-gradient(135deg, #5c7cfa 0%, #8b5cf6 100%);
+}
 
-        .number-item {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 10px;
-            border-radius: 8px;
-            font-weight: bold;
-            transition: all 0.3s ease;
-        }
+.btn:active {
+    transform: translateY(-1px) scale(1.02);
+}
 
-        .number-item:hover {
-            transform: scale(1.1);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
+.result {
+    margin-top: 40px;
+    padding: 30px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: none;
+    position: relative;
+}
 
-        .error {
-            background: rgba(255, 87, 87, 0.1);
-            border-left: 5px solid #ff5757;
-            color: #d63031;
-        }
+.result.show {
+    display: block;
+    animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
-        .loading {
-            display: none;
-            color: #667eea;
-            font-style: italic;
-        }
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
 
-        .loading.show {
-            display: block;
-        }
+.result h3 {
+    color: #fff;
+    margin-bottom: 20px;
+    font-size: 1.4em;
+    font-weight: 600;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
 
-        @media (max-width: 480px) {
-            .container {
-                padding: 20px;
-            }
-            
-            h1 {
-                font-size: 2em;
-            }
-            
-            input[type="number"] {
-                width: 100%;
-                max-width: 200px;
-            }
-        }
+.numbers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.number-item {
+    background: linear-gradient(135deg, rgba(76, 110, 245, 0.8) 0%, rgba(124, 58, 237, 0.8) 100%);
+    backdrop-filter: blur(10px);
+    color: white;
+    padding: 15px 10px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1.1em;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.number-item:hover {
+    transform: translateY(-3px) scale(1.08);
+    box-shadow: 0 10px 25px rgba(76, 110, 245, 0.4);
+    background: linear-gradient(135deg, rgba(92, 124, 250, 0.9) 0%, rgba(139, 92, 246, 0.9) 100%);
+}
+
+.error {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #fecaca;
+}
+
+.loading {
+    display: none;
+    color: rgba(255, 255, 255, 0.8);
+    font-style: italic;
+    font-size: 1.1em;
+}
+
+.loading.show {
+    display: block;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 30px 20px;
+        border-radius: 20px;
+    }
+    
+    h1 {
+        font-size: 2.2em;
+        margin-bottom: 30px;
+    }
+    
+    input[type="number"] {
+        width: 100%;
+        max-width: 250px;
+        padding: 16px 20px;
+    }
+
+    .btn {
+        padding: 16px 30px;
+        margin: 8px 4px;
+        min-width: 120px;
+    }
+
+    .numbers-grid {
+        grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+        gap: 8px;
+    }
+
+    .number-item {
+        padding: 12px 8px;
+        font-size: 1em;
+    }
+}
     </style>
 </head>
 <body>
