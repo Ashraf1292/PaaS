@@ -94,9 +94,9 @@ LOGIN_TEMPLATE = """
             background-color: #4CAF50; color: white; padding: 10px 20px; 
             border: none; border-radius: 4px; cursor: pointer; width: 100%; 
         }
-        button:hover { background-color: #45a049; }
+        button:hover { background-color: #1949AA; }
         .message { padding: 10px; margin: 10px 0; border-radius: 4px; }
-        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .success { background-color: #d4edda; color: #365EAF; border: 1px solid #c3e6cb; }
         .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
     </style>
 </head>
