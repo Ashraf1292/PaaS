@@ -1,0 +1,12 @@
+# Exported from Render on 2025-07-27T11:39:31Z
+services:
+- type: web
+  name: TASK 1 (n_numbers)
+  runtime: python
+  repo: https://github.com/Ashraf1292/Labib_PaaS
+  plan: free
+  region: oregon
+  buildCommand: cd even_number_ && pip install -r requirements.txt
+  startCommand: cd even_number_ && gunicorn main:app
+  autoDeployTrigger: commit
+version: "1"
