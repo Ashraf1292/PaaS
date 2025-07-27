@@ -91,7 +91,7 @@ LOGIN_TEMPLATE = """
             width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; 
         }
         button { 
-            background-color: #4CAF50; color: white; padding: 10px 20px; 
+            background-color: #1F3D7B; color: white; padding: 10px 20px; 
             border: none; border-radius: 4px; cursor: pointer; width: 100%; 
         }
         button:hover { background-color: #1949AA; }
