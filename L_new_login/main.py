@@ -131,7 +131,7 @@ LOGIN_TEMPLATE = """
     <style>
         /* Custom styles for a more dynamic gradient */
         body {
-            background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+            background: linear-gradient(135deg, #e0e7ff 0%, #c3daff 100%); /* Lighter blue-purple gradient */
             animation: gradientShift 10s ease infinite alternate;
         }
 
@@ -155,11 +155,11 @@ LOGIN_TEMPLATE = """
     <div class="w-full max-w-lg bg-white rounded-xl shadow-xl p-10 card-glow">
         <h2 class="text-3xl font-extrabold text-center text-gray-900 mb-8 relative">
             Join Our Community
-            <span class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-28 h-1 bg-teal-500 transition-all duration-300"></span>
+            <span class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-28 h-1 bg-blue-600 transition-all duration-300"></span>
         </h2>
         
-        <div class="bg-teal-50 border-l-4 border-teal-600 p-5 mb-10 rounded-r-xl">
-            <p class="text-sm text-teal-800 font-medium">
+        <div class="bg-blue-50 border-l-4 border-blue-600 p-5 mb-10 rounded-r-xl">
+            <p class="text-sm text-blue-800 font-medium">
                 <span class="font-semibold">Quick & Secure:</span> Provide your essential details to get started. Your privacy matters to us!
             </p>
         </div>
@@ -178,7 +178,7 @@ LOGIN_TEMPLATE = """
                 <input type="text" id="username" name="username" required
                        value="{{ request.form.username if request.form.username else '' }}"
                        placeholder="Choose a unique username"
-                       class="w-full px-5 py-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition duration-200 hover:border-teal-400 text-gray-800">
+                       class="w-full px-5 py-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 hover:border-blue-400 text-gray-800">
             </div>
             
             <div>
@@ -187,7 +187,7 @@ LOGIN_TEMPLATE = """
                 </label>
                 <input type="password" id="password" name="password" required
                        placeholder="Create a strong password"
-                       class="w-full px-5 py-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition duration-200 hover:border-teal-400 text-gray-800">
+                       class="w-full px-5 py-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 hover:border-blue-400 text-gray-800">
             </div>
             
             <div class="pt-6 border-t border-gray-200">
@@ -200,7 +200,7 @@ LOGIN_TEMPLATE = """
                 <input type="email" id="email" name="email"
                        placeholder="your.email@example.com"
                        value="{{ request.form.email if request.form.email else '' }}"
-                       class="w-full px-5 py-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition duration-200 hover:border-teal-400 text-gray-800">
+                       class="w-full px-5 py-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 hover:border-blue-400 text-gray-800">
                 <p class="text-xs text-gray-500 mt-1 italic">Provide for account recovery, if desired</p>
             </div>
             
@@ -209,19 +209,19 @@ LOGIN_TEMPLATE = """
                 <input type="tel" id="phone" name="phone"
                        placeholder="e.g., +1 (555) 123-4567"
                        value="{{ request.form.phone if request.form.phone else '' }}"
-                       class="w-full px-5 py-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition duration-200 hover:border-teal-400 text-gray-800">
+                       class="w-full px-5 py-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 hover:border-blue-400 text-gray-800">
                 <p class="text-xs text-gray-500 mt-1 italic">Optional for recovery or notifications</p>
             </div>
             
             <button type="submit"
-                    class="w-full bg-gradient-to-r from-teal-500 to-emerald-600 text-white py-4 rounded-lg font-semibold hover:from-teal-600 hover:to-emerald-700 focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition duration-200">
+                    class="w-full bg-gradient-to-r from-blue-600 to-purple-700 text-white py-4 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-800 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200">
                 Sign Up Now
             </button>
         </form>
         
         <div class="mt-10 pt-6 text-center text-sm text-gray-600">
-            <p class="font-medium">Already have an account? <a href="/login" class="text-teal-600 hover:underline font-medium">Log In Here</a></p>
-            <p class="mt-3">For debugging, visit <a href="/debug" class="text-teal-600 hover:underline font-medium">/debug</a></p>
+            <p class="font-medium">Already have an account? <a href="/login" class="text-blue-600 hover:underline font-medium">Log In Here</a></p>
+            <p class="mt-3">For debugging, visit <a href="/debug" class="text-blue-600 hover:underline font-medium">/debug</a></p>
         </div>
     </div>
 </body>
