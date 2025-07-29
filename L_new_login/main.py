@@ -128,23 +128,44 @@ LOGIN_TEMPLATE = """
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Registration</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for a more dynamic gradient */
+        body {
+            background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+            animation: gradientShift 10s ease infinite alternate;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+
+        .card-glow {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+
+        .card-glow:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+    </style>
 </head>
-<body class="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-    <div class="w-full max-w-lg bg-gradient-to-br from-white to-gray-100 rounded-3xl shadow-2xl p-10">
-        <h2 class="text-3xl font-extrabold text-center text-gray-800 mb-8 relative">
-            Create Your Account
-            <span class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-indigo-500 transition-all duration-300"></span>
+<body class="min-h-screen flex items-center justify-center p-6">
+    <div class="w-full max-w-lg bg-white rounded-xl shadow-xl p-10 card-glow">
+        <h2 class="text-3xl font-extrabold text-center text-gray-900 mb-8 relative">
+            Join Our Community
+            <span class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-28 h-1 bg-teal-500 transition-all duration-300"></span>
         </h2>
         
-        <div class="bg-indigo-50 border-l-4 border-indigo-600 p-5 mb-10 rounded-r-xl">
-            <p class="text-sm text-indigo-800 font-medium">
-                <span class="font-semibold">Secure Registration:</span> Enter your username and password. 
-                Optionally provide email and/or phone number for account recovery.
+        <div class="bg-teal-50 border-l-4 border-teal-600 p-5 mb-10 rounded-r-xl">
+            <p class="text-sm text-teal-800 font-medium">
+                <span class="font-semibold">Quick & Secure:</span> Provide your essential details to get started. Your privacy matters to us!
             </p>
         </div>
         
         {% if message %}
-            <div class="mb-8 p-5 rounded-xl {{ 'bg-green-100 text-green-800 border border-green-300' if message_type == 'success' else 'bg-red-100 text-red-800 border border-red-300' }}">
+            <div class="mb-8 p-5 rounded-lg {{ 'bg-green-100 text-green-800 border border-green-300' if message_type == 'success' else 'bg-red-100 text-red-800 border border-red-300' }}">
                 {{ message }}
             </div>
         {% endif %}
@@ -156,8 +177,8 @@ LOGIN_TEMPLATE = """
                 </label>
                 <input type="text" id="username" name="username" required
                        value="{{ request.form.username if request.form.username else '' }}"
-                       placeholder="Choose a username"
-                       class="w-full px-5 py-4 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 hover:border-indigo-400 text-gray-800">
+                       placeholder="Choose a unique username"
+                       class="w-full px-5 py-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition duration-200 hover:border-teal-400 text-gray-800">
             </div>
             
             <div>
@@ -165,13 +186,13 @@ LOGIN_TEMPLATE = """
                     Password <span class="text-red-500">*</span>
                 </label>
                 <input type="password" id="password" name="password" required
-                       placeholder="Create a password"
-                       class="w-full px-5 py-4 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 hover:border-indigo-400 text-gray-800">
+                       placeholder="Create a strong password"
+                       class="w-full px-5 py-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition duration-200 hover:border-teal-400 text-gray-800">
             </div>
             
             <div class="pt-6 border-t border-gray-200">
-                <p class="text-sm font-semibold text-gray-700 mb-3">Additional Information</p>
-                <p class="text-xs text-gray-500 italic mb-4">Optional - helps with account recovery</p>
+                <p class="text-sm font-semibold text-gray-700 mb-3">Optional Information</p>
+                <p class="text-xs text-gray-500 italic mb-4">Enhance account security & recovery</p>
             </div>
             
             <div>
@@ -179,28 +200,28 @@ LOGIN_TEMPLATE = """
                 <input type="email" id="email" name="email"
                        placeholder="your.email@example.com"
                        value="{{ request.form.email if request.form.email else '' }}"
-                       class="w-full px-5 py-4 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 hover:border-indigo-400 text-gray-800">
-                <p class="text-xs text-gray-500 mt-1 italic">Leave blank if not providing email</p>
+                       class="w-full px-5 py-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition duration-200 hover:border-teal-400 text-gray-800">
+                <p class="text-xs text-gray-500 mt-1 italic">Provide for account recovery, if desired</p>
             </div>
             
             <div>
                 <label for="phone" class="block text-sm font-semibold text-gray-700 mb-2">Phone Number</label>
                 <input type="tel" id="phone" name="phone"
-                       placeholder="e.g., +1234567890"
+                       placeholder="e.g., +1 (555) 123-4567"
                        value="{{ request.form.phone if request.form.phone else '' }}"
-                       class="w-full px-5 py-4 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 hover:border-indigo-400 text-gray-800">
-                <p class="text-xs text-gray-500 mt-1 italic">Leave blank if not providing phone</p>
+                       class="w-full px-5 py-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition duration-200 hover:border-teal-400 text-gray-800">
+                <p class="text-xs text-gray-500 mt-1 italic">Optional for recovery or notifications</p>
             </div>
             
             <button type="submit"
-                    class="w-full bg-gradient-to-r from-indigo-600 to-blue-600 text-white py-4 rounded-xl font-semibold hover:from-indigo-700 hover:to-blue-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition duration-200">
-                Register Account
+                    class="w-full bg-gradient-to-r from-teal-500 to-emerald-600 text-white py-4 rounded-lg font-semibold hover:from-teal-600 hover:to-emerald-700 focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition duration-200">
+                Sign Up Now
             </button>
         </form>
         
         <div class="mt-10 pt-6 text-center text-sm text-gray-600">
-            <p class="font-medium">Create a new account with your details</p>
-            <p class="mt-3">Visit <a href="/debug" class="text-indigo-600 hover:underline font-medium">/debug</a> for database details</p>
+            <p class="font-medium">Already have an account? <a href="/login" class="text-teal-600 hover:underline font-medium">Log In Here</a></p>
+            <p class="mt-3">For debugging, visit <a href="/debug" class="text-teal-600 hover:underline font-medium">/debug</a></p>
         </div>
     </div>
 </body>
