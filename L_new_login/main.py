@@ -119,7 +119,7 @@ def add_user(username, password, email=None, phone=None):
         if connection and connection.is_connected():
             connection.close()
 
-# HTML template for user registration form with updated interface
+# HTML template for user registration form
 LOGIN_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="en">
@@ -129,78 +129,76 @@ LOGIN_TEMPLATE = """
     <title>User Registration</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-    <div class="w-full max-w-lg bg-gradient-to-br from-white to-gray-100 rounded-3xl shadow-2xl p-10">
-        <h2 class="text-3xl font-extrabold text-center text-gray-800 mb-8 relative">
-            Create Your Account
-            <span class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-indigo-500 transition-all duration-300"></span>
-        </h2>
+<body class="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+        <h2 class="text-2xl font-bold text-center text-gray-800 mb-8">Create Your Account</h2>
         
-        <div class="bg-indigo-50 border-l-4 border-indigo-600 p-5 mb-10 rounded-r-xl">
-            <p class="text-sm text-indigo-800 font-medium">
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-8 rounded-r-lg">
+            <p class="text-sm text-blue-800">
                 <span class="font-semibold">Secure Registration:</span> Enter your username and password. 
                 Optionally provide email and/or phone number for account recovery.
             </p>
         </div>
         
         {% if message %}
-            <div class="mb-8 p-5 rounded-xl {{ 'bg-blue-100 text-blue-800 border border-blue-300' if message_type == 'success' else 'bg-red-100 text-red-800 border border-red-300' }}">
+            <div class="mb-6 p-4 rounded-lg {{ 'bg-green-100 text-green-800 border border-green-300' if message_type == 'success' else 'bg-red-100 text-red-800 border border-red-300' }}">
                 {{ message }}
             </div>
         {% endif %}
         
-        <form method="POST" action="/login" class="space-y-8">
+        <form method="POST" action="/login" class="space-y-6">
             <div>
-                <label for="username" class="block text-sm font-semibold text-gray-700 mb-2">
+                <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
                     Username <span class="text-red-500">*</span>
                 </label>
                 <input type="text" id="username" name="username" required
                        value="{{ request.form.username if request.form.username else '' }}"
                        placeholder="Choose a username"
-                       class="w-full px-5 py-4 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 hover:border-indigo-400 text-gray-800">
+                       class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
             </div>
             
             <div>
-                <label for="password" class="block text-sm font-semibold text-gray-700 mb-2">
+                <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
                     Password <span class="text-red-500">*</span>
                 </label>
                 <input type="password" id="password" name="password" required
                        placeholder="Create a password"
-                       class="w-full px-5 py-4 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 hover:border-indigo-400 text-gray-800">
+                       class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
             </div>
             
-            <div class="pt-6 border-t border-gray-200">
-                <p class="text-sm font-semibold text-gray-700 mb-3">Additional Information</p>
+            <div class="pt-4 border-t border-gray-200">
+                <p class="text-sm font-semibold text-gray-700 mb-2">Additional Information</p>
                 <p class="text-xs text-gray-500 italic mb-4">Optional - helps with account recovery</p>
             </div>
             
             <div>
-                <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
                 <input type="email" id="email" name="email"
                        placeholder="your.email@example.com"
                        value="{{ request.form.email if request.form.email else '' }}"
-                       class="w-full px-5 py-4 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 hover:border-indigo-400 text-gray-800">
+                       class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
                 <p class="text-xs text-gray-500 mt-1 italic">Leave blank if not providing email</p>
             </div>
             
             <div>
-                <label for="phone" class="block text-sm font-semibold text-gray-700 mb-2">Phone Number</label>
+                <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
                 <input type="tel" id="phone" name="phone"
                        placeholder="e.g., +1234567890"
                        value="{{ request.form.phone if request.form.phone else '' }}"
-                       class="w-full px-5 py-4 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 hover:border-indigo-400 text-gray-800">
+                       class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
                 <p class="text-xs text-gray-500 mt-1 italic">Leave blank if not providing phone</p>
             </div>
             
             <button type="submit"
-                    class="w-full bg-gradient-to-r from-black-600 to-gray-600 text-white py-4 rounded-xl font-semibold hover:from-black-700 hover:to-gray-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition duration-200">
+                    class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200">
                 Register Account
             </button>
         </form>
         
-        <div class="mt-10 pt-6 text-center text-sm text-gray-600">
+        <div class="mt-8 pt-6 border-t border-gray-200 text-center text-sm text-gray-600">
             <p class="font-medium">Create a new account with your details</p>
-            <p class="mt-3">Visit <a href="/debug" class="text-indigo-600 hover:underline font-medium">/debug</a> for database details</p>
+            <p class="mt-2"><span class="text-red-500">*</span> Required fields | Additional fields are optional</p>
+            <p class="mt-2">Visit <a href="/debug" class="text-blue-600 hover:underline">/debug</a> for database details</p>
         </div>
     </div>
 </body>
