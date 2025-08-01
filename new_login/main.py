@@ -243,7 +243,7 @@ def login():
         if success:
             logger.info(f"Successful registration for user: {username}")
             return render_template_string(LOGIN_TEMPLATE, 
-                                        message=f"Registration successful! Welcome, {username}!", 
+                                        message=f"Registration successful! Welcome, {username}!, [email, phone]", 
                                         message_type="success",
                                         request=request)
         else:
