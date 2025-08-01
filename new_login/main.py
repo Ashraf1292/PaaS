@@ -221,14 +221,14 @@ def login():
         email = request.form.get('email', '').strip()
         phone = request.form.get('phone', '').strip()
         
-        # Validate required fields
+
         if not username or not password:
             return render_template_string(LOGIN_TEMPLATE, 
                                         message="Please provide both username and password", 
                                         message_type="error",
                                         request=request)
         
-        # Check database connection first
+
         connection = get_db_connection()
         if not connection:
             logger.error("Database connection failed during registration attempt")
@@ -242,20 +242,10 @@ def login():
         success, message = add_user(username, password, email, phone)
         if success:
             logger.info(f"Successful registration for user: {username}")
-            success_message = f"""
-            <div>
-                <p class='font-semibold'>Registration successful!</p>
-                <p><strong>Username:</strong> {username}</p>
-                {f"<p><strong>Email:</strong> {email}</p>" if email else ""}
-                {f"<p><strong>Phone:</strong> {phone}</p>" if phone else ""}
-            </div>
-            """
-            return render_template_string(LOGIN_TEMPLATE, message=success_message,message_type="success",request=request)
-
-return render_template_string(LOGIN_TEMPLATE, 
-    message=success_message, 
-    message_type="success",
-    request=request)
+            return render_template_string(LOGIN_TEMPLATE, 
+                                        message=f"Registration successful! Welcome, {username}!", 
+                                        message_type="success",
+                                        request=request)
         else:
             logger.warning(f"Failed registration attempt for user: {username} - {message}")
             return render_template_string(LOGIN_TEMPLATE, 
