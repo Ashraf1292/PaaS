@@ -251,9 +251,9 @@ def login():
             </div>
            """
            return render_template_string(LOGIN_TEMPLATE, 
-               message=success_message, 
-               message_type="success",
-               request=request) 
+                                         message=success_message, 
+                                         message_type="success",
+                                         request=request) 
 
 return render_template_string(LOGIN_TEMPLATE, 
     message=success_message, 
