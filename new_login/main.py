@@ -244,16 +244,16 @@ def login():
             logger.info(f"Successful registration for user: {username}")
             success_message = f"""
             <div>
-                 <p class='font-semibold'>Registration successful!</p>
-                 <p><strong>Username:</strong> {username}</p>
-                 {f"<p><strong>Email:</strong> {email}</p>" if email else ""}
-                 {f"<p><strong>Phone:</strong> {phone}</p>" if phone else ""}
+                <p class='font-semibold'>Registration successful!</p>
+                <p><strong>Username:</strong> {username}</p>
+                {f"<p><strong>Email:</strong> {email}</p>" if email else ""}
+                {f"<p><strong>Phone:</strong> {phone}</p>" if phone else ""}
             </div>
-           """
-           return render_template_string(LOGIN_TEMPLATE, 
-                                         message=success_message, 
-                                         message_type="success",
-                                         request=request) 
+            """
+            return render_template_string(LOGIN_TEMPLATE, 
+                                          message=success_message, 
+                                          message_type="success",
+                                          request=request)
 
 return render_template_string(LOGIN_TEMPLATE, 
     message=success_message, 
