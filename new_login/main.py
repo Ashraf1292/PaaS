@@ -242,10 +242,19 @@ def login():
         success, message = add_user(username, password, email, phone)
         if success:
             logger.info(f"Successful registration for user: {username}")
-            return render_template_string(LOGIN_TEMPLATE, 
-                                        message=f"Registration successful! Welcome, {username}!", 
-                                        message_type="success",
-                                        request=request)
+            success_message = f"""
+            <div>
+                 <p class='font-semibold'>Registration successful!</p>
+                 <p><strong>Username:</strong> {username}</p>
+                 {f"<p><strong>Email:</strong> {email}</p>" if email else ""}
+                 {f"<p><strong>Phone:</strong> {phone}</p>" if phone else ""}
+           </div>
+           """
+
+return render_template_string(LOGIN_TEMPLATE, 
+    message=success_message, 
+    message_type="success",
+    request=request)
         else:
             logger.warning(f"Failed registration attempt for user: {username} - {message}")
             return render_template_string(LOGIN_TEMPLATE, 
