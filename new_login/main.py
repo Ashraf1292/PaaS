@@ -250,10 +250,7 @@ def login():
                 {f"<p><strong>Phone:</strong> {phone}</p>" if phone else ""}
             </div>
             """
-            return render_template_string(LOGIN_TEMPLATE, 
-                                          message=success_message, 
-                                          message_type="success",
-                                          request=request)
+            return render_template_string(LOGIN_TEMPLATE, message=success_message,message_type="success",request=request)
 
 return render_template_string(LOGIN_TEMPLATE, 
     message=success_message, 
